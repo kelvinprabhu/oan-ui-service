@@ -14,121 +14,118 @@ const getHostUrl = (): string => {
 };
 
 export const startTelemetry = (sessionId: string, userDetailsObj: { preferred_username: string; email: string }) => {
-    const key = "gyte5565fdbgbngfnhgmnhmjgm,jm,";
-    const secret = "gnjhgjugkk";
-    const config = {
-      pdata: {
-        id: "MahaVistaar",
-        ver: "v0.1",
-        pid: "MahaVistaar"
-      },
-      channel: "MahaVistaar-" + getHostUrl(),
-      sid: sessionId,
-      uid: userDetailsObj['preferred_username'] || "DEFAULT-USER",
-      did: userDetailsObj['email'] || "DEFAULT-USER",
-      authtoken: "",
-      host: "/observability-service"
-    }
+  // Use environment variables or fallbacks for security
+  const key = import.meta.env.VITE_TELEMETRY_KEY || "gyte5565fdbgbngfnhgmnhmjgm,jm,";
+  const secret = import.meta.env.VITE_TELEMETRY_SECRET || "gnjhgjugkk";
 
-    const startEdata = {};
-    const options = {};
-    const token = AuthTokenGenerate.generate(key, secret);
-    config.authtoken = token;
-    Telemetry.start(config, "content_id", "contetn_ver", startEdata, options);
-  };
+  // Use environment variables or fallbacks
+  const telemetryHost = import.meta.env.VITE_TELEMETRY_HOST || "http://localhost:3000";
+  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
+  const productId = import.meta.env.VITE_TELEMETRY_PRODUCT_ID || "MahaVistaar";
+  const productVersion = import.meta.env.VITE_TELEMETRY_PRODUCT_VERSION || "v0.1";
+  const productPid = import.meta.env.VITE_TELEMETRY_PRODUCT_PID || "MahaVistaar";
+
+  const config = {
+    pdata: {
+      id: productId,
+      ver: productVersion,
+      pid: productPid
+    },
+    channel: telemetryChannel + "-" + getHostUrl(),
+    sid: sessionId,
+    uid: userDetailsObj['preferred_username'] || "DEFAULT-USER",
+    did: userDetailsObj['email'] || "DEFAULT-USER",
+    authtoken: "",
+    host: telemetryHost
+  }
+
+  const startEdata = {};
+  const options = {};
+  const token = AuthTokenGenerate.generate(key, secret);
+  config.authtoken = token;
+  Telemetry.start(config, "content_id", "contetn_ver", startEdata, options);
+};
 
 export const logQuestionEvent = (questionId: string, sessionId: string, questionText: string) => {
+  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
     "type": "Question",
-    "parent": {
-      "id": "p1",
-      "type": "default"
-    },
     "questionsDetails": {
       "questionText": questionText,
       "sessionId": sessionId
     }
   };
-  
-  const questionData = { 
-    qid: questionId, 
+
+  const questionData = {
+    qid: questionId,
     type: "CHOOSE",
     target: target,
     sid: sessionId,
-    channel: "MahaVistaar-" + getHostUrl()
+    channel: telemetryChannel + "-" + getHostUrl()
   };
-  
+
   Telemetry.response(questionData);
 };
 
 export const logResponseEvent = (questionId: string, sessionId: string, questionText: string, responseText: string) => {
+  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
     "type": "QuestionResponse",
-    "parent": {
-      "id": "p1",
-      "type": "default"
-    },
     "questionsDetails": {
-      "questionText": questionText, 
+      "questionText": questionText,
       "answerText": responseText,
       "sessionId": sessionId
     }
   };
-  
-  const responseData = { 
-    qid: questionId, 
-    type: "CHOOSE", 
+
+  const responseData = {
+    qid: questionId,
+    type: "CHOOSE",
     target: target,
     sid: sessionId,
-    channel: "MahaVistaar-" + getHostUrl()
+    channel: telemetryChannel + "-" + getHostUrl()
   };
-  
+
   Telemetry.response(responseData);
 };
 
 export const logErrorEvent = (questionId: string, sessionId: string, error: string) => {
+  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
     "type": "Error",
-    "parent": {
-      "id": "p1",
-      "type": "default"
-    },
-    "errorDetails": {
+    "questionsDetails": {
       "errorText": error,
       "sessionId": sessionId
     }
-  };  
+  };
 
   const errorData = {
     qid: questionId,
     type: "CHOOSE",
     target: target,
     sid: sessionId,
-    channel: "MahaVistaar-" + getHostUrl()
+    channel: telemetryChannel + "-" + getHostUrl()
   };
 
   Telemetry.response(errorData);
 };
 
 export const logFeedbackEvent = (questionId: string, sessionId: string, feedbackText: string, feedbackType: string, questionText: string, responseText: string) => {
+  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
     "type": "Feedback",
-    "parent": {
-      "id": "p1",
-      "type": "default"
-    },
     "feedbackDetails": {
       "feedbackText": feedbackText,
       "sessionId": sessionId,
-      "questionText": questionText, 
+      "questionText": questionText,
       "answerText": responseText,
       "feedbackType": feedbackType
     }
@@ -139,7 +136,7 @@ export const logFeedbackEvent = (questionId: string, sessionId: string, feedback
     type: "CHOOSE",
     target: target,
     sid: sessionId,
-    channel: "MahaVistaar-" + getHostUrl()
+    channel: telemetryChannel + "-" + getHostUrl()
   };
 
   Telemetry.response(feedbackData);

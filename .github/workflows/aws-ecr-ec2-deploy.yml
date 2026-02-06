@@ -1,0 +1,116 @@
+name: Deploy to AWS ECR and EC2
+
+on:
+  push:
+    branches:
+      - main
+      - devops
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  SERVICE_NAME: oan-ui-service
+  CONTAINER_NAME: oan-ui-service-container
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
+            --build-arg VITE_JWT_AUDIENCE=${{ secrets.VITE_JWT_AUDIENCE }} \
+            --build-arg VITE_JWT_ISSUER=${{ secrets.VITE_JWT_ISSUER }} \
+            --build-arg VITE_JWT_EXPIRY_DAYS=${{ secrets.VITE_JWT_EXPIRY_DAYS }} \
+            --build-arg VITE_APP_NAME=${{ secrets.VITE_APP_NAME }} \
+            --build-arg VITE_APP_TITLE=${{ secrets.VITE_APP_TITLE }} \
+            --build-arg VITE_DEFAULT_LANGUAGE=${{ secrets.VITE_DEFAULT_LANGUAGE }} \
+            --build-arg VITE_ENABLE_TELEMETRY=${{ secrets.VITE_ENABLE_TELEMETRY }} \
+            --build-arg VITE_ENABLE_GEOLOCATION=${{ secrets.VITE_ENABLE_GEOLOCATION }} \
+            --build-arg VITE_ENABLE_VOICE_INPUT=${{ secrets.VITE_ENABLE_VOICE_INPUT }} \
+            --build-arg VITE_ENABLE_TTS=${{ secrets.VITE_ENABLE_TTS }} \
+            --build-arg VITE_MAX_RECORDING_DURATION=${{ secrets.VITE_MAX_RECORDING_DURATION }} \
+            --build-arg VITE_AUDIO_SERVICE_TYPE=${{ secrets.VITE_AUDIO_SERVICE_TYPE }} \
+            --build-arg VITE_DEBUG_MODE=${{ secrets.VITE_DEBUG_MODE }} \
+            --build-arg VITE_USE_MOCK_DATA=${{ secrets.VITE_USE_MOCK_DATA }} \
+            --build-arg VITE_TELEMETRY_HOST=${{ secrets.VITE_TELEMETRY_HOST }} \
+            --build-arg VITE_TELEMETRY_KEY=${{ secrets.VITE_TELEMETRY_KEY }} \
+            --build-arg VITE_TELEMETRY_SECRET=${{ secrets.VITE_TELEMETRY_SECRET }} \
+            --build-arg VITE_TELEMETRY_CHANNEL=${{ secrets.VITE_TELEMETRY_CHANNEL }} \
+            --build-arg VITE_TELEMETRY_PRODUCT_ID=${{ secrets.VITE_TELEMETRY_PRODUCT_ID }} \
+            --build-arg VITE_TELEMETRY_PRODUCT_VERSION=${{ secrets.VITE_TELEMETRY_PRODUCT_VERSION }} \
+            --build-arg VITE_TELEMETRY_PRODUCT_PID=${{ secrets.VITE_TELEMETRY_PRODUCT_PID }} \
+            --build-arg VITE_DEFAULT_THEME=${{ secrets.VITE_DEFAULT_THEME }} \
+            --build-arg VITE_ENABLE_ANIMATIONS=${{ secrets.VITE_ENABLE_ANIMATIONS }} \
+            --build-arg VITE_SUPPORTED_LANGUAGES=${{ secrets.VITE_SUPPORTED_LANGUAGES }} \
+            -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-$IMAGE_TAG \
+            -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-latest \
+            .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-$IMAGE_TAG
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-latest
+          echo "image=$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Deploy to EC2
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Login to ECR
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            
+            # Pull latest image
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-latest
+            
+            # Stop and remove existing container
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            
+            # Run new container
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              -p 80:8081 \
+              --restart always \
+              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-latest
+            
+            # Clean up unused images
+            docker image prune -af
+          EOF
+          
+          rm -f private_key.pem
+
+      - name: Deployment summary
+        run: |
+          echo "### Deployment Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Service:** ${{ env.SERVICE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Container:** ${{ env.CONTAINER_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ steps.build-image.outputs.image }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed to:** ${{ secrets.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
