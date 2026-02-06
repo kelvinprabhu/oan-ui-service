@@ -51,10 +51,13 @@ const App = () => {
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/error" element={<ErrorPage />} />
-                  <Route path="/chat" element={
+                  {/* <Route path="/chat" element={
                     <PrivateRoute>
                       <ChatPage />
                     </PrivateRoute>
+                  } /> */}
+                  <Route path="/chat" element={
+                      <ChatPage />
                   } />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -31,7 +31,7 @@ interface TTSResponse {
 const JWT_STORAGE_KEY = 'auth_jwt';
 
 class ApiService {
-  private apiUrl: string = 'https://prodaskvistaar.mahapocra.gov.in';
+  private apiUrl: string = import.meta.env.VITE_API_URL;
   private locationData: LocationData | null = null;
   private currentSessionId: string | null = null;
   private axiosInstance: AxiosInstance;
@@ -43,7 +43,7 @@ class ApiService {
       baseURL: this.apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': this.authToken ? `Bearer ${this.authToken}` : 'NA'
+        // 'Authorization': this.authToken ? `Bearer ${this.authToken}` : 'NA'
       }
     });
     
@@ -72,7 +72,12 @@ class ApiService {
     }
   }
 
+  private get isDevMode(): boolean {
+    return import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true';
+  }
+
   private refreshAuthToken(): void {
+    if (this.isDevMode) return;
     this.authToken = this.getAuthToken();
     if (this.authToken) {
       this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${this.authToken}`;
@@ -94,6 +99,7 @@ class ApiService {
   }
 
   private getAuthHeaders(): Record<string, string> {
+    if (this.isDevMode) return {};
     // Always get fresh token before generating headers
     this.refreshAuthToken();
     return {
@@ -102,6 +108,7 @@ class ApiService {
   }
 
   private validateAuth(): boolean {
+    if (this.isDevMode) return true;
     if (!this.authToken) {
       this.redirectToErrorPage();
       return false;
