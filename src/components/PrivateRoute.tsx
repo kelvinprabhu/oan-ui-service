@@ -10,7 +10,11 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
   const { user } = useAuth();
   const isLoggedIn = user?.authenticated;
 
-  return isLoggedIn ? children : <Navigate to="/error" />;
+  // TEMPORARY: Bypass authentication for testing
+  // TODO: Remove this and implement proper authentication
+  const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+
+  return (isLoggedIn || bypassAuth) ? children : <Navigate to="/error" />;
 };
 
 export default PrivateRoute;

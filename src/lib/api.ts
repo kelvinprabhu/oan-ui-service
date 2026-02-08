@@ -35,7 +35,7 @@ class ApiService {
   private locationData: LocationData | null = null;
   private currentSessionId: string | null = null;
   private axiosInstance: AxiosInstance;
-  private authToken: string | null = null;  
+  private authToken: string | null = null;
 
   constructor() {
     this.authToken = this.getAuthToken();
@@ -46,7 +46,7 @@ class ApiService {
         'Authorization': this.authToken ? `Bearer ${this.authToken}` : 'NA'
       }
     });
-    
+
     // Log the token being used
     // console.log('Using auth token:', this.authToken );
   }
@@ -55,16 +55,16 @@ class ApiService {
     try {
       const tokenData = localStorage.getItem(JWT_STORAGE_KEY);
       if (!tokenData) return null;
-      
+
       const parsedData = JSON.parse(tokenData);
       const now = new Date().getTime();
-      
+
       // Check if token is expired
       if (now > parsedData.expiry) {
         localStorage.removeItem(JWT_STORAGE_KEY);
         return null;
       }
-      
+
       return parsedData.token;
     } catch (error) {
       console.error("Error retrieving JWT for API calls:", error);
@@ -81,7 +81,7 @@ class ApiService {
       this.redirectToErrorPage();
     }
   }
-  
+
   private redirectToErrorPage(): void {
     // Check if we're in a browser environment and not already on error page
     if (typeof window !== 'undefined' && !window.location.pathname.includes('/error')) {
@@ -102,6 +102,10 @@ class ApiService {
   }
 
   private validateAuth(): boolean {
+    // TEMPORARY: Bypass authentication for testing
+    const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+    if (bypassAuth) return true;
+
     if (!this.authToken) {
       this.redirectToErrorPage();
       return false;
@@ -121,7 +125,7 @@ class ApiService {
       if (!this.validateAuth()) {
         return { response: "Authentication error", status: "error" };
       }
-      
+
       const params = {
         session_id: session,
         query: msg,
@@ -136,7 +140,7 @@ class ApiService {
         // Handle streaming response
         const response = await fetch(`${this.apiUrl}/api/chat/?${new URLSearchParams(params)}`, {
           method: 'GET',
-          headers: headers          
+          headers: headers
         });
 
         if (!response.ok) {
@@ -154,7 +158,7 @@ class ApiService {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           const chunk = decoder.decode(value, { stream: true });
           try {
             // Try to parse as JSON
@@ -192,7 +196,7 @@ class ApiService {
       if (!this.validateAuth()) {
         return [];
       }
-      
+
       const params = {
         session_id: session,
         target_lang: targetLang
@@ -223,7 +227,7 @@ class ApiService {
       if (!this.validateAuth()) {
         return { text: "", lang_code: "", status: "error" };
       }
-      
+
       const payload = {
         audio_content: audioBase64,
         service_type: serviceType,
@@ -248,11 +252,11 @@ class ApiService {
     if (!this.validateAuth()) {
       return Promise.reject(new Error("Authentication required"));
     }
-    
+
     const config = {
       headers: this.getAuthHeaders()
     };
-    
+
     return this.axiosInstance.post(`/api/tts/`, {
       session_id: sessionId,
       text: text,

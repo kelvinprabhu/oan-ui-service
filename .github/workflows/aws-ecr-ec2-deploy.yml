@@ -43,6 +43,7 @@ jobs:
             --build-arg VITE_JWT_AUDIENCE=${{ secrets.VITE_JWT_AUDIENCE }} \
             --build-arg VITE_JWT_ISSUER=${{ secrets.VITE_JWT_ISSUER }} \
             --build-arg VITE_JWT_EXPIRY_DAYS=${{ secrets.VITE_JWT_EXPIRY_DAYS }} \
+            --build-arg VITE_BYPASS_AUTH=${{ secrets.VITE_BYPASS_AUTH }} \
             --build-arg VITE_APP_NAME=${{ secrets.VITE_APP_NAME }} \
             --build-arg VITE_APP_TITLE=${{ secrets.VITE_APP_TITLE }} \
             --build-arg VITE_DEFAULT_LANGUAGE=${{ secrets.VITE_DEFAULT_LANGUAGE }} \

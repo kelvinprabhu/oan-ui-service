@@ -26,7 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   login: async () => false,
-  logout: () => {},
+  logout: () => { },
   setAuthToken: async () => false,
 });
 
@@ -79,15 +79,15 @@ mwIDAQAB
               setUser(null);
             }
           } else {
-               console.error('Public key not loaded.');
-               setUser(null);
+            console.error('Public key not loaded.');
+            setUser(null);
           }
         }
         // Otherwise, check for JWT in localStorage
         else {
           const storedToken = getStoredJWT();
           if (storedToken) {
-             if (importedPublicKey) {
+            if (importedPublicKey) {
               const result = await validateJWT(storedToken, importedPublicKey);
               if (result.isValid) {
                 createUserFromPayload(result.payload);
@@ -96,10 +96,10 @@ mwIDAQAB
                 localStorage.removeItem(JWT_STORAGE_KEY);
                 setUser(null);
               }
-             } else {
-               console.error('Public key not loaded.');
-               setUser(null);
-             }
+            } else {
+              console.error('Public key not loaded.');
+              setUser(null);
+            }
           } else {
             setUser(null);
           }
@@ -121,10 +121,10 @@ mwIDAQAB
       setUser(null);
       return;
     }
-    
+
     // Extract name from payload, use fallbacks
     const name = payload.name as string || 'Anonymous User';
-    
+
     // For email, try to get from payload or use fallback
     // let email = 'user@example.com';
     let email = '';
@@ -133,7 +133,7 @@ mwIDAQAB
     } else if (payload.sub) {
       email = `${payload.sub}@example.com`;
     }
-    
+
     setUser({
       authenticated: true,
       username: name,
@@ -147,12 +147,12 @@ mwIDAQAB
       const now = new Date();
       const expiryDate = new Date(now);
       expiryDate.setDate(now.getDate() + JWT_EXPIRY_DAYS);
-      
+
       const tokenData = {
         token,
         expiry: expiryDate.getTime()
       };
-      
+
       localStorage.setItem(JWT_STORAGE_KEY, JSON.stringify(tokenData));
       return true;
     } catch (error) {
@@ -166,16 +166,16 @@ mwIDAQAB
     try {
       const tokenData = localStorage.getItem(JWT_STORAGE_KEY);
       if (!tokenData) return null;
-      
+
       const parsedData = JSON.parse(tokenData);
       const now = new Date().getTime();
-      
+
       // Check if token is expired
       if (now > parsedData.expiry) {
         localStorage.removeItem(JWT_STORAGE_KEY);
         return null;
       }
-      
+
       return parsedData.token;
     } catch (error) {
       console.error("Error retrieving JWT:", error);
