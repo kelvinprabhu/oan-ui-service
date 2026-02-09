@@ -57,6 +57,14 @@ mwIDAQAB
     const initAuth = async () => {
       try {
         setIsLoading(true);
+        // Check if Web Crypto API is available (requires HTTPS or localhost)
+        if (typeof window !== 'undefined' && (!window.crypto || !window.crypto.subtle)) {
+          console.warn("Web Crypto API (window.crypto.subtle) is not available. This usually happens when the site is not served over HTTPS. Authentication validation will be skipped.");
+          setIsLoading(false);
+          setUser(null);
+          return;
+        }
+
         // Import the public key
         const importedPublicKey = await importSPKI(publicKeyPEM, 'RS256');
         setPublicKey(importedPublicKey);

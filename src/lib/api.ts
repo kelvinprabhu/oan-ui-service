@@ -78,7 +78,12 @@ class ApiService {
       this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${this.authToken}`;
     } else {
       this.axiosInstance.defaults.headers.common['Authorization'] = 'NA';
-      this.redirectToErrorPage();
+
+      // Only redirect if NOT bypassing auth
+      const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+      if (!bypassAuth) {
+        this.redirectToErrorPage();
+      }
     }
   }
 
