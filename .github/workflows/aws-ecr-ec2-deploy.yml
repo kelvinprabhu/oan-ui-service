@@ -106,7 +106,7 @@ jobs:
 
       - name: Deployment summary
         run: |
-          echo "### Deployment Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Summary:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Service:** ${{ env.SERVICE_NAME }}" >> $GITHUB_STEP_SUMMARY
           echo "**Container:** ${{ env.CONTAINER_NAME }}" >> $GITHUB_STEP_SUMMARY
