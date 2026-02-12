@@ -22,3 +22,4 @@ jobs:
             -t demo-app:${{ github.sha }} \
             -t demo-app:latest \
             .
+            
