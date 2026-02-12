@@ -38,6 +38,9 @@ class ApiService {
   private authToken: string | null = null;
 
   constructor() {
+    console.log('API Service initialized with URL:', this.apiUrl);
+    console.log(' VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+
     this.authToken = this.getAuthToken();
     this.axiosInstance = axios.create({
       baseURL: this.apiUrl,
