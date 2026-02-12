@@ -53,7 +53,7 @@ class ApiService {
     // Log the token being used
     // console.log('Using auth token:', this.authToken );
   }
-
+// testing
   private getAuthToken(): string | null {
     try {
       const tokenData = localStorage.getItem(JWT_STORAGE_KEY);
