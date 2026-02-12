@@ -57,6 +57,7 @@ jobs:
             --build-arg VITE_USE_MOCK_DATA=${{ vars.VITE_USE_MOCK_DATA }} \
             --build-arg VITE_TELEMETRY_HOST=${{ secrets.VITE_TELEMETRY_HOST }} \
             --build-arg VITE_TELEMETRY_KEY=${{ secrets.VITE_TELEMETRY_KEY }} \
+            --build-arg VITE_TELEMETRY_SECRET=${{ secrets.VITE_TELEMETRY_SECRET }} \
             --build-arg VITE_TELEMETRY_CHANNEL=${{ vars.VITE_TELEMETRY_CHANNEL }} \
             --build-arg VITE_TELEMETRY_PRODUCT_ID=${{ vars.VITE_TELEMETRY_PRODUCT_ID }} \
             --build-arg VITE_TELEMETRY_PRODUCT_VERSION=${{ vars.VITE_TELEMETRY_PRODUCT_VERSION }} \
@@ -64,11 +65,11 @@ jobs:
             --build-arg VITE_DEFAULT_THEME=${{ vars.VITE_DEFAULT_THEME }} \
             --build-arg VITE_ENABLE_ANIMATIONS=${{ vars.VITE_ENABLE_ANIMATIONS }} \
             --build-arg VITE_SUPPORTED_LANGUAGES=${{ vars.VITE_SUPPORTED_LANGUAGES }} \
-            -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ vars.SERVICE_NAME }}-$IMAGE_TAG \
-            -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ vars.SERVICE_NAME }}-latest \
+            -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-$IMAGE_TAG \
+            -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-latest \
             .
-          docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ vars.SERVICE_NAME }}-$IMAGE_TAG
-          docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ vars.SERVICE_NAME }}-latest
-          echo "image=$ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ vars.SERVICE_NAME }}-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-$IMAGE_TAG
+          docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-latest
+          echo "image=$ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.SERVICE_NAME }}-$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       
