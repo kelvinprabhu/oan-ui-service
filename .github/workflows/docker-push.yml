@@ -23,10 +23,6 @@ jobs:
 
       - name: Build and push image
         run: |
-          docker build \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/mh-oan-ui-app:${{ github.sha }} \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/mh-oan-ui-app:latest \
-            .
-
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mh-oan-ui-app:${{ github.sha }} -t ${{ secrets.DOCKERHUB_USERNAME }}/mh-oan-ui-app:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mh-oan-ui-app:${{ github.sha }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mh-oan-ui-app:latest
