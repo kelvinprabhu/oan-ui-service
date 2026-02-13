@@ -69,5 +69,6 @@ COPY --from=build /usr/local/app/dist .
 # Add nginx config for SPA routing
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 8081
-CMD ["nginx", "-g", "daemon off;"]
+
+# Start Nginx
+CMD ["/bin/sh", "-c", "find /usr/share/nginx/html -type f -name '*.js' -exec sed -i \"s|__RUNTIME_VITE_API_URL__|${VITE_API_URL:-http://127.0.0.1:8000}|g\" {} + && nginx -g 'daemon off;'"]
