@@ -70,5 +70,11 @@ COPY --from=build /usr/local/app/dist .
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Start Nginx
-CMD ["/bin/sh", "-c", "find /usr/share/nginx/html -type f -name '*.js' -exec sed -i \"s|__RUNTIME_VITE_API_URL__|${VITE_API_URL:-http://127.0.0.1:8000}|g\" {} + && nginx -g 'daemon off;'"]
+# Copy entrypoint script
+COPY entrypoint.sh /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+EXPOSE 8081
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
