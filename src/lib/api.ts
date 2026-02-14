@@ -31,7 +31,7 @@ interface TTSResponse {
 const JWT_STORAGE_KEY = 'auth_jwt';
 
 class ApiService {
-  private apiUrl: string = import.meta.env.VITE_API_URL || 'http://llm.service.consul:8080';
+  private apiUrl: string = import.meta.env.VITE_API_URL;
   private locationData: LocationData | null = null;
   private currentSessionId: string | null = null;
   private axiosInstance: AxiosInstance;
