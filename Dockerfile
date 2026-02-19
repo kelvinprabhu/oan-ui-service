@@ -30,6 +30,7 @@ ARG VITE_ENABLE_ANIMATIONS
 ARG VITE_SUPPORTED_LANGUAGES
 
 # Set environment variables from build args
+# Set environment variables from build args
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_JWT_AUDIENCE=$VITE_JWT_AUDIENCE
 ENV VITE_JWT_ISSUER=$VITE_JWT_ISSUER
@@ -58,8 +59,15 @@ ENV VITE_ENABLE_ANIMATIONS=$VITE_ENABLE_ANIMATIONS
 ENV VITE_SUPPORTED_LANGUAGES=$VITE_SUPPORTED_LANGUAGES
 
 WORKDIR /usr/local/app
-COPY ./ /usr/local/app/
+
+# Copy package.json and lock file first for caching
+COPY package*.json ./
+
 RUN npm install
+
+# Copy source code
+COPY . .
+
 RUN npm run build
 
 # Stage 2: Serve

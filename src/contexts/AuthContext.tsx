@@ -1,8 +1,14 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { jwtVerify, importSPKI, JWTPayload } from 'jose';
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+} from "react";
+import { jwtVerify, importSPKI, JWTPayload } from "jose";
 
 // Constants
-const JWT_STORAGE_KEY = 'auth_jwt';
+const JWT_STORAGE_KEY = "auth_jwt";
 const JWT_EXPIRY_DAYS = 365; // 1 year expiration
 
 // User interface that contains the essential user information
@@ -43,13 +49,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // JWT validation public key (from backend keys)
   const publicKeyPEM = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqnM+qKH3XWqWPBBi/Q38
-n8pWNPiPknnvxDE3V1/owL7ajrSLO3Ge0WUXTmYtbm2EjIzmbg0nGTPG8O9WoZbb
-CwHwIg+0qrmgL/KH39he2MxsdXIU3chB73uPxjN9h0x1hGH7ld3iErw3tpsLkRXu
-s5jXKPYgb+hO7uvN41eUFa6f8NooFPmnMPBqiubF6iWuVxb4EciCO+04Hdd9HuwO
-NpNljAi30qwFLtcMUF2+aySJb1hQM60umPevJDAcLxNjrrCjbRX6zCdF/4orLMQz
-A2rLBns5oeHelvTUybGxk1NMHPui/rX34TFZHynSztdoCjqlMoQvpsMZaS56FYGI
-GwIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
+4lgOEePzNm0tRgeLezV6ffAt0gunVTLw7onLRnrq0/IzW7yWR7QkrmBL7jTKEn5u
++qKhbwKfBstIs+bMY2Zkp18gnTxKLxoS2tFczGkPLPgizskuemMghRniWaoLcyeh
+kd3qqGElvW/VDL5AaWTg0nLVkjRo9z+40RQzuVaE8AkAFmxZzow3x+VJYKdjykkJ
+0iT9wCS0DRTXu269V264Vf/3jvredZiKRkgwlL9xNAwxXFg0x/XFw005UWVRIkdg
+cKWTjpBP2dPwVZ4WWC+9aGVd+Gyn1o0CLelf4rEjGoXbAAEgAqeGUxrcIlbjXfbc
+mwIDAQAB
 -----END PUBLIC KEY-----`;
 
   // Initialize auth state on component mount
@@ -58,12 +64,12 @@ GwIDAQAB
       try {
         setIsLoading(true);
         // Import the public key
-        const importedPublicKey = await importSPKI(publicKeyPEM, 'RS256');
+        const importedPublicKey = await importSPKI(publicKeyPEM, "RS256");
         setPublicKey(importedPublicKey);
 
         // Check URL params first for new JWT
         const urlParams = new URLSearchParams(window.location.search);
-        const tokenFromUrl = urlParams.get('token');
+        const tokenFromUrl = urlParams.get("token");
 
         // If JWT exists in URL, validate and store it
         if (tokenFromUrl) {
@@ -79,15 +85,15 @@ GwIDAQAB
               setUser(null);
             }
           } else {
-               console.error('Public key not loaded.');
-               setUser(null);
+            console.error("Public key not loaded.");
+            setUser(null);
           }
         }
         // Otherwise, check for JWT in localStorage
         else {
           const storedToken = getStoredJWT();
           if (storedToken) {
-             if (importedPublicKey) {
+            if (importedPublicKey) {
               const result = await validateJWT(storedToken, importedPublicKey);
               if (result.isValid) {
                 createUserFromPayload(result.payload);
@@ -96,10 +102,10 @@ GwIDAQAB
                 localStorage.removeItem(JWT_STORAGE_KEY);
                 setUser(null);
               }
-             } else {
-               console.error('Public key not loaded.');
-               setUser(null);
-             }
+            } else {
+              console.error("Public key not loaded.");
+              setUser(null);
+            }
           } else {
             setUser(null);
           }
@@ -121,23 +127,23 @@ GwIDAQAB
       setUser(null);
       return;
     }
-    
+
     // Extract name from payload, use fallbacks
-    const name = payload.name as string || 'Anonymous User';
-    
+    const name = (payload.name as string) || "Anonymous User";
+
     // For email, try to get from payload or use fallback
     // let email = 'user@example.com';
-    let email = '';
+    let email = "";
     if (payload.email) {
       email = payload.email as string;
     } else if (payload.sub) {
       email = `${payload.sub}@example.com`;
     }
-    
+
     setUser({
       authenticated: true,
       username: name,
-      email: email
+      email: email,
     });
   };
 
@@ -147,12 +153,12 @@ GwIDAQAB
       const now = new Date();
       const expiryDate = new Date(now);
       expiryDate.setDate(now.getDate() + JWT_EXPIRY_DAYS);
-      
+
       const tokenData = {
         token,
-        expiry: expiryDate.getTime()
+        expiry: expiryDate.getTime(),
       };
-      
+
       localStorage.setItem(JWT_STORAGE_KEY, JSON.stringify(tokenData));
       return true;
     } catch (error) {
@@ -166,16 +172,16 @@ GwIDAQAB
     try {
       const tokenData = localStorage.getItem(JWT_STORAGE_KEY);
       if (!tokenData) return null;
-      
+
       const parsedData = JSON.parse(tokenData);
       const now = new Date().getTime();
-      
+
       // Check if token is expired
       if (now > parsedData.expiry) {
         localStorage.removeItem(JWT_STORAGE_KEY);
         return null;
       }
-      
+
       return parsedData.token;
     } catch (error) {
       console.error("Error retrieving JWT:", error);
@@ -184,12 +190,15 @@ GwIDAQAB
   };
 
   // Function to validate JWT and extract payload
-  async function validateJWT(token: string, key: CryptoKey): Promise<{ isValid: boolean; payload: JWTPayload | null }> {
+  async function validateJWT(
+    token: string,
+    key: CryptoKey,
+  ): Promise<{ isValid: boolean; payload: JWTPayload | null }> {
     try {
       const { payload } = await jwtVerify(token, key);
       return { isValid: true, payload };
     } catch (e) {
-      console.error('JWT verification failed:', e);
+      console.error("JWT verification failed:", e);
       return { isValid: false, payload: null };
     }
   }
@@ -213,16 +222,19 @@ GwIDAQAB
   };
 
   // Login function - to be implemented with actual API call
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (
+    username: string,
+    password: string,
+  ): Promise<boolean> => {
     // This should be implemented with actual API call
     setIsLoading(true);
     try {
       // In a real implementation, this would call your authentication API
       // and get back a real JWT token
-      console.log('Login called with:', username, password);
+      console.log("Login called with:", username, password);
       return false; // Return false since we're not implementing real login yet
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       return false;
     } finally {
       setIsLoading(false);
@@ -237,7 +249,9 @@ GwIDAQAB
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, setAuthToken }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, logout, setAuthToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -247,7 +261,7 @@ GwIDAQAB
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-} 
+}

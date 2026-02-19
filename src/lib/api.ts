@@ -43,7 +43,7 @@ class ApiService {
       baseURL: this.apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        // 'Authorization': this.authToken ? `Bearer ${this.authToken}` : 'NA'
+        'Authorization': this.authToken ? `Bearer ${this.authToken}` : 'NA'
       }
     });
     
