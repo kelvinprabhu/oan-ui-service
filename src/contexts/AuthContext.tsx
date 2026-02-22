@@ -57,6 +57,20 @@ mwIDAQAB
     const initAuth = async () => {
       try {
         setIsLoading(true);
+
+        // Check if we are bypassing authentication entirely (local dev)
+        const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+        if (bypassAuth) {
+          console.warn('Authentication bypassed via VITE_BYPASS_AUTH environment variable');
+          setUser({
+            authenticated: true,
+            username: 'Bypass User',
+            email: 'bypass@example.com'
+          });
+          setIsLoading(false);
+          return;
+        }
+
         // Check if Web Crypto API is available (requires HTTPS or localhost)
         if (typeof window !== 'undefined' && (!window.crypto || !window.crypto.subtle)) {
           console.warn("Web Crypto API (window.crypto.subtle) is not available. This usually happens when the site is not served over HTTPS. Authentication validation will be skipped.");
