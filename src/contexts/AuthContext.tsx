@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { jwtVerify, importSPKI, JWTPayload } from 'jose';
+import { ENV } from '../lib/env';
 
 // Constants
 const JWT_STORAGE_KEY = 'auth_jwt';
@@ -59,7 +60,7 @@ mwIDAQAB
         setIsLoading(true);
 
         // Check if we are bypassing authentication entirely (local dev)
-        const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+        const bypassAuth = String(ENV.VITE_BYPASS_AUTH) === 'true';
         if (bypassAuth) {
           console.warn('Authentication bypassed via VITE_BYPASS_AUTH environment variable');
           setUser({

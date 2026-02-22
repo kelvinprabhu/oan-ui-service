@@ -1,18 +1,21 @@
 #!/bin/sh
 set -e
 
-echo "Substituting environment variables in static files..."
+echo "Generating /env-config.js from environment variables..."
 
-# Find all JS and HTML files in the html serving directory
-find /usr/share/nginx/html -type f \( -name "*.js" -o -name "*.html" \) | while read -r file; do
-  # Loop over every environment variable starting with VITE_
-  env | grep '^VITE_' | while IFS='=' read -r name value; do
-    # Escape pipe characters and ampersands since we use | as sed delimiter
-    escaped_value=$(echo "$value" | sed -e 's/|/\\|/g' -e 's/&/\\&/g')
-    # Replace the placeholder (e.g., VITE_API_URL_PLACEHOLDER) with the actual runtime value
-    sed -i "s|${name}_PLACEHOLDER|${escaped_value}|g" "$file"
-  done
+# Create env-config.js file in nginx root
+cat <<EOF > /usr/share/nginx/html/env-config.js
+window._env_ = {
+EOF
+
+# Loop over environment variables and append to JS object
+env | grep '^VITE_' | while IFS='=' read -r name value; do
+  # Escape double quotes and backslashes
+  escaped_value=$(echo "$value" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+  echo "  \"$name\": \"$escaped_value\"," >> /usr/share/nginx/html/env-config.js
 done
 
-echo "Starting Nginx..."
+echo "};" >> /usr/share/nginx/html/env-config.js
+
+echo "Configuration applied. Starting Nginx..."
 exec "$@"

@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { ENV } from './env';
 
 export interface LocationData {
   latitude: number;
@@ -31,7 +32,7 @@ interface TTSResponse {
 const JWT_STORAGE_KEY = 'auth_jwt';
 
 class ApiService {
-  private apiUrl: string = import.meta.env.VITE_API_URL;
+  private apiUrl: string = ENV.VITE_API_URL;
   private locationData: LocationData | null = null;
   private currentSessionId: string | null = null;
   private axiosInstance: AxiosInstance;
@@ -39,7 +40,7 @@ class ApiService {
 
   constructor() {
     console.log('API Service initialized with URL:', this.apiUrl);
-    console.log(' VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+    console.log(' VITE_API_URL from env:', ENV.VITE_API_URL);
 
     this.authToken = this.getAuthToken();
     this.axiosInstance = axios.create({
@@ -83,7 +84,7 @@ class ApiService {
       this.axiosInstance.defaults.headers.common['Authorization'] = 'NA';
 
       // Only redirect if NOT bypassing auth
-      const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+      const bypassAuth = String(ENV.VITE_BYPASS_AUTH) === 'true';
       if (!bypassAuth) {
         this.redirectToErrorPage();
       }
@@ -111,7 +112,7 @@ class ApiService {
 
   private validateAuth(): boolean {
     // TEMPORARY: Bypass authentication for testing
-    const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+    const bypassAuth = String(ENV.VITE_BYPASS_AUTH) === 'true';
     if (bypassAuth) return true;
 
     if (!this.authToken) {

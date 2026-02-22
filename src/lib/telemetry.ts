@@ -1,4 +1,5 @@
 // --- V3 Telemetry Specification Alignment ---
+import { ENV } from './env';
 
 // Declare V3 Telemetry methods required for this implementation
 // Note: Implementations for all methods are assumed to exist in the global Telemetry object.
@@ -15,15 +16,15 @@ const getHostUrl = (): string => {
 
 export const startTelemetry = (sessionId: string, userDetailsObj: { preferred_username: string; email: string }) => {
   // Use environment variables or fallbacks for security
-  const key = import.meta.env.VITE_TELEMETRY_KEY || "gyte5565fdbgbngfnhgmnhmjgm,jm,";
-  const secret = import.meta.env.VITE_TELEMETRY_SECRET || "gnjhgjugkk";
+  const key = ENV.VITE_TELEMETRY_KEY || "gyte5565fdbgbngfnhgmnhmjgm,jm,";
+  const secret = ENV.VITE_TELEMETRY_SECRET || "gnjhgjugkk";
 
   // Use environment variables or fallbacks
-  const telemetryHost = import.meta.env.VITE_TELEMETRY_HOST || "http://localhost:3000";
-  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
-  const productId = import.meta.env.VITE_TELEMETRY_PRODUCT_ID || "MahaVistaar";
-  const productVersion = import.meta.env.VITE_TELEMETRY_PRODUCT_VERSION || "v0.1";
-  const productPid = import.meta.env.VITE_TELEMETRY_PRODUCT_PID || "MahaVistaar";
+  const telemetryHost = ENV.VITE_TELEMETRY_HOST || "http://localhost:3000";
+  const telemetryChannel = ENV.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
+  const productId = ENV.VITE_TELEMETRY_PRODUCT_ID || "MahaVistaar";
+  const productVersion = ENV.VITE_TELEMETRY_PRODUCT_VERSION || "v0.1";
+  const productPid = ENV.VITE_TELEMETRY_PRODUCT_PID || "MahaVistaar";
 
   const config = {
     pdata: {
@@ -47,7 +48,7 @@ export const startTelemetry = (sessionId: string, userDetailsObj: { preferred_us
 };
 
 export const logQuestionEvent = (questionId: string, sessionId: string, questionText: string) => {
-  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
+  const telemetryChannel = ENV.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
@@ -70,7 +71,7 @@ export const logQuestionEvent = (questionId: string, sessionId: string, question
 };
 
 export const logResponseEvent = (questionId: string, sessionId: string, questionText: string, responseText: string) => {
-  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
+  const telemetryChannel = ENV.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
@@ -94,7 +95,7 @@ export const logResponseEvent = (questionId: string, sessionId: string, question
 };
 
 export const logErrorEvent = (questionId: string, sessionId: string, error: string) => {
-  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
+  const telemetryChannel = ENV.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
@@ -117,7 +118,7 @@ export const logErrorEvent = (questionId: string, sessionId: string, error: stri
 };
 
 export const logFeedbackEvent = (questionId: string, sessionId: string, feedbackText: string, feedbackType: string, questionText: string, responseText: string) => {
-  const telemetryChannel = import.meta.env.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
+  const telemetryChannel = ENV.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const target = {
     "id": "default",
     "ver": "v0.1",
