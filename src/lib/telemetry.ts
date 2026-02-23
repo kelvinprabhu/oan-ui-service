@@ -20,7 +20,7 @@ export const startTelemetry = (sessionId: string, userDetailsObj: { preferred_us
   const secret = ENV.VITE_TELEMETRY_SECRET || "gnjhgjugkk";
 
   // Use environment variables or fallbacks
-  const telemetryHost = ENV.VITE_TELEMETRY_HOST || "http://localhost:3000";
+  const telemetryHost = ENV.VITE_TELEMETRY_HOST ?? "http://localhost:3000";
   const telemetryChannel = ENV.VITE_TELEMETRY_CHANNEL || "MahaVistaar";
   const productId = ENV.VITE_TELEMETRY_PRODUCT_ID || "MahaVistaar";
   const productVersion = ENV.VITE_TELEMETRY_PRODUCT_VERSION || "v0.1";
